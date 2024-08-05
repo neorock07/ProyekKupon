@@ -83,12 +83,27 @@ if (!empty($data['id_rfid']) && !empty($data['id_kantin']) && !empty($data['id_k
     $query->bind_param("iiiiss", $id_kantin, $id_katering, $id_rfid, $id_arduino, $status_transaksi, $error_reason);
 
     if ($query->execute()) {
+        //select jumlah terjual masing-masing alat
+        $sql_count = "SELECT COUNT(*) AS total_penjualan
+                      FROM kupon_harian  
+                      WHERE DATE(waktu_scan) = DATE(CURRENT_TIMESTAMP) 
+                      AND status_transaksi = 'berhasil'
+                      AND
+                      id_arduino = ?;";
+
+        $query_count = $conn->prepare($sql_count);
+        $query_count->bind_param("i", $id_arduino);
+        $query_count->execute();
+        $result_count = $query_count->get_result();
+        $fetch_count = $result_count->fetch_assoc();
+        $total_penjualan = $fetch_count['total_penjualan'];
 
         echo json_encode(array(
             "message" => "Record Created",
             "kantin" => $nama_kantin,
             "status" => $status_transaksi,
             "error" => $error_reason,
+            "jumlah" => $total_penjualan,
             "tanggal" => date("Y-m-d")
         ));
     } else {
