@@ -56,6 +56,7 @@ $sql_rfid = "CREATE TABLE IF NOT EXISTS rfid(
         nik_user INT(10),
         nama_user VARCHAR(60),
         status_kupon BOOLEAN NOT NULL,
+        waktu_scan DATETIME NOT NULL,
         FOREIGN KEY (id_kantin) REFERENCES kantin(id_kantin),
         FOREIGN KEY (id_bagian) REFERENCES bagian(id_bagian),
         FOREIGN KEY (id_seksi) REFERENCES seksi(id_seksi)

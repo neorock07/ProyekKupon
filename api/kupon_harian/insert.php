@@ -19,6 +19,20 @@ if (!empty($data['no_rfid']) && !empty($data['id_kantin']) && !empty($data['id_k
     $fetch_id = $data_id->fetch_assoc();
     $id_rfid = $fetch_id['id_rfid'];
 
+    $sql_cek_scan = "SELECT DATE(waktu_scan) AS waktu_scan FROM rfid WHERE id_rfid = ?";
+    $query_cek_scan = $conn->prepare($sql_cek_scan);
+    $query_cek_scan->bind_param("i", $id_rfid);
+
+    if ($query_cek_scan->execute()) {
+        //get hasil select waktu scan
+        $result_cek_scan = $query_cek_scan->get_result();
+        $row_scan = $result_cek_scan->fetch_assoc();
+        $tanggal_scan = new DateTime($row_scan['waktu_scan']);
+        $tanggal_sekarang = new DateTime();
+        $query_cek_scan->close();
+    }
+
+
 
     //cek apakah id_kantin pada data yang diinputkan sama dengan id_kantin pada tabel rfid
     $sql_cek_kantin = "SELECT id_kantin FROM rfid WHERE id_rfid = ?";
@@ -58,14 +72,17 @@ if (!empty($data['no_rfid']) && !empty($data['id_kantin']) && !empty($data['id_k
                 $query_cek_status_kupon->bind_param("i", $id_rfid);
 
                 if ($query_cek_status_kupon->execute()) {
+                    //get hasil select status kupon
                     $result_status_kupon = $query_cek_status_kupon->get_result();
                     $row_kupon = $result_status_kupon->fetch_assoc();
-                    if (!empty($row_kupon)) {
-                        if ($row_kupon['status_kupon'] == 1) {
+
+                    if (!empty($row_kupon) || !empty($row_scan)) {
+                        //ubah status ke 0, jika kupon telah digunakan. note: 0->not available;1->available
+                        if ($row_kupon['status_kupon'] == 1 || ($tanggal_scan->format('Y-m-d') < $tanggal_sekarang->format('Y-m-d'))) {
                             $status_kupon = 0;
 
                             //update status_kupon pada tabel rfid    
-                            $sql_update_kupon = "UPDATE rfid SET status_kupon = ? WHERE id_rfid = ?";
+                            $sql_update_kupon = "UPDATE rfid SET status_kupon = ?, waktu_scan = CURRENT_TIMESTAMP WHERE id_rfid = ?";
                             $query_update_kupon = $conn->prepare($sql_update_kupon);
                             $query_update_kupon->bind_param("ii", $status_kupon, $id_rfid);
                             $query_update_kupon->execute();
@@ -113,6 +130,7 @@ if (!empty($data['no_rfid']) && !empty($data['id_kantin']) && !empty($data['id_k
             "status" => $status_transaksi,
             "error" => $error_reason,
             "jumlah" => $total_penjualan,
+            "terakhir_scan" => $tanggal_scan->format('Y-m-d'),
             "tanggal" => date("Y-m-d")
         ));
     } else {

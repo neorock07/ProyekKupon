@@ -13,6 +13,7 @@ if(!empty($data['id_rfid'])){
     $nik_user = $data['nik_user'];
     $nama_user = $data['nama_user'];
     $status_kupon = $data['status_kupon'];
+    $waktu_scan = $data['waktu_scan'];
 
     $sql = "UPDATE rfid SET 
             id_bagian = ?,
@@ -21,10 +22,11 @@ if(!empty($data['id_rfid'])){
             no_rfid = ?,
             nik_user = ?,
             nama_user = ?,
-            status_kupon = ?
+            status_kupon = ?,
+            waktu_scan = ?
             WHERE id_rfid = ?";
     $query = $conn->prepare($sql);
-    $query->bind_param("iiisisii", $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon, $id_rfid);
+    $query->bind_param("iiisisisi", $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon, $waktu_scan, $id_rfid);
 
     if($query->execute()){
         echo json_encode(array(

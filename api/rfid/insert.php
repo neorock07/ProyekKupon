@@ -12,10 +12,11 @@ if ( !empty($data['id_bagian']) && !empty($data['id_kantin']) && !empty($data['n
     $nik_user = $data['nik_user'];
     $nama_user = $data['nama_user'];
     $status_kupon = $data['status_kupon'];
+    $waktu_scan = $data['waktu_scan'];
     
-    $sql = "INSERT INTO rfid (id_bagian, id_seksi, id_kantin, no_rfid, nik_user, nama_user, status_kupon) VALUES (?,?, ?, ?, ? ,?,?)";
+    $sql = "INSERT INTO rfid (id_bagian, id_seksi, id_kantin, no_rfid, nik_user, nama_user, status_kupon, waktu_scan) VALUES (?,?, ?, ?, ? ,?,?, ?)";
     $query = $conn->prepare($sql);
-    $query->bind_param("iiisisi",  $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon);
+    $query->bind_param("iiisisis",  $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon, $waktu_scan);
 
     if ($query->execute()) {
         echo json_encode(array(
