@@ -4,11 +4,21 @@ require_once "C:/laragon/www/ProyekKupon/config/koneksi.php";
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-if (!empty($data['id_rfid']) && !empty($data['id_kantin']) && !empty($data['id_katering']) && !empty($data['id_arduino'])) {
+if (!empty($data['no_rfid']) && !empty($data['id_kantin']) && !empty($data['id_katering']) && !empty($data['id_arduino'])) {
     $id_kantin = $data['id_kantin'];
     $id_katering = $data['id_katering'];
-    $id_rfid = $data['id_rfid'];
+    $no_rfid = $data['no_rfid'];
     $id_arduino = $data['id_arduino'];
+
+    //select id_rfid berdasarkan no_rfid
+    $sql_find_id = "SELECT id_rfid FROM rfid WHERE no_rfid = ?";
+    $query_find_id = $conn->prepare($sql_find_id);
+    $query_find_id->bind_param("s", $no_rfid);
+    $query_find_id->execute();
+    $data_id = $query_find_id->get_result();
+    $fetch_id = $data_id->fetch_assoc();
+    $id_rfid = $fetch_id['id_rfid'];
+
 
     //cek apakah id_kantin pada data yang diinputkan sama dengan id_kantin pada tabel rfid
     $sql_cek_kantin = "SELECT id_kantin FROM rfid WHERE id_rfid = ?";
@@ -18,22 +28,22 @@ if (!empty($data['id_rfid']) && !empty($data['id_kantin']) && !empty($data['id_k
     if ($query_cek_kantin->execute()) {
         $result_kantin = $query_cek_kantin->get_result();
         $row = $result_kantin->fetch_assoc();
-         
+
         //cek nama kantin
-         $sql_cek_nama_kantin = "SELECT nama_kantin FROM kantin WHERE id_kantin = ?";
-         $query_cek_nama_kantin = $conn->prepare($sql_cek_nama_kantin);
-         $query_cek_nama_kantin->bind_param("i", $row['id_kantin']);
-         
-         if($query_cek_nama_kantin->execute()){
-             $result_nama_kantin = $query_cek_nama_kantin->get_result();
-             $data_kantin = $result_nama_kantin->fetch_assoc();
-             $nama_kantin = $data_kantin['nama_kantin'];
-         }else{
-             $nama_kantin = "kantin tidak ada";
-         }
-         
-         $query_cek_nama_kantin->close();
-        
+        $sql_cek_nama_kantin = "SELECT nama_kantin FROM kantin WHERE id_kantin = ?";
+        $query_cek_nama_kantin = $conn->prepare($sql_cek_nama_kantin);
+        $query_cek_nama_kantin->bind_param("i", $row['id_kantin']);
+
+        if ($query_cek_nama_kantin->execute()) {
+            $result_nama_kantin = $query_cek_nama_kantin->get_result();
+            $data_kantin = $result_nama_kantin->fetch_assoc();
+            $nama_kantin = $data_kantin['nama_kantin'];
+        } else {
+            $nama_kantin = "kantin tidak ada";
+        }
+
+        $query_cek_nama_kantin->close();
+
 
         //jika data kantin ada 
         if (!empty($row)) {
@@ -76,11 +86,10 @@ if (!empty($data['id_rfid']) && !empty($data['id_kantin']) && !empty($data['id_k
 
 
 
-
     //menyimpan data transaksi tap rfid
     $sql = "INSERT INTO kupon_harian (id_kantin, id_katering, id_rfid, id_arduino, waktu_scan, status_transaksi, error_reason) VALUES (?,?, ?, ?, CURRENT_TIMESTAMP ,?,?)";
     $query = $conn->prepare($sql);
-    $query->bind_param("iiiiss", $id_kantin, $id_katering, $id_rfid, $id_arduino, $status_transaksi, $error_reason);
+    $query->bind_param("iiisss", $id_kantin, $id_katering, $id_rfid, $id_arduino, $status_transaksi, $error_reason);
 
     if ($query->execute()) {
         //select jumlah terjual masing-masing alat
@@ -92,7 +101,7 @@ if (!empty($data['id_rfid']) && !empty($data['id_kantin']) && !empty($data['id_k
                       id_arduino = ?;";
 
         $query_count = $conn->prepare($sql_count);
-        $query_count->bind_param("i", $id_arduino);
+        $query_count->bind_param("s", $id_arduino);
         $query_count->execute();
         $result_count = $query_count->get_result();
         $fetch_count = $result_count->fetch_assoc();

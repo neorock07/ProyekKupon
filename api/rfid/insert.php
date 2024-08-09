@@ -4,7 +4,7 @@ require_once "C:/laragon/www/ProyekKupon/config/koneksi.php";
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-if (!empty($data['id_bagian']) && !empty($data['id_kantin']) && !empty($data['no_rfid']) && !empty($data['status_kupon'])) {
+if ( !empty($data['id_bagian']) && !empty($data['id_kantin']) && !empty($data['no_rfid']) && !empty($data['status_kupon'])) {
     $id_bagian = $data['id_bagian'];
     $id_seksi = $data['id_seksi'];
     $id_kantin = $data['id_kantin'];
@@ -15,7 +15,7 @@ if (!empty($data['id_bagian']) && !empty($data['id_kantin']) && !empty($data['no
     
     $sql = "INSERT INTO rfid (id_bagian, id_seksi, id_kantin, no_rfid, nik_user, nama_user, status_kupon) VALUES (?,?, ?, ?, ? ,?,?)";
     $query = $conn->prepare($sql);
-    $query->bind_param("iiiiisi", $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon);
+    $query->bind_param("iiisisi",  $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon);
 
     if ($query->execute()) {
         echo json_encode(array(

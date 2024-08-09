@@ -24,7 +24,7 @@ if(!empty($data['id_rfid'])){
             status_kupon = ?
             WHERE id_rfid = ?";
     $query = $conn->prepare($sql);
-    $query->bind_param("iiiiisii", $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon ,$id_rfid);
+    $query->bind_param("iiisisii", $id_bagian, $id_seksi, $id_kantin, $no_rfid, $nik_user, $nama_user, $status_kupon ,$id_rfid);
 
     if($query->execute()){
         echo json_encode(array(

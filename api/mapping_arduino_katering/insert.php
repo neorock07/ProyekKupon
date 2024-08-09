@@ -13,7 +13,7 @@ if (!empty($data['id_katering']) && !empty($data['id_arduino']) && !empty($data[
 
     $sql = "INSERT INTO mapping_arduino_katering (id_katering, id_arduino, id_kantin, tanggal_awal, tanggal_akhir) VALUES (?,?,?,?,?)";
     $query = $conn->prepare($sql);
-    $query->bind_param("iiiss", $id_katering, $id_arduino, $id_kantin, $tanggal_awal, $tanggal_akhir);
+    $query->bind_param("isiss", $id_katering, $id_arduino, $id_kantin, $tanggal_awal, $tanggal_akhir);
 
     if ($query->execute()) {
         echo json_encode(array(
